@@ -6,6 +6,7 @@ import org.redline_rpm.Builder
 import org.redline_rpm.header.Architecture
 import org.redline_rpm.header.Header
 import org.redline_rpm.header.Os
+import org.redline_rpm.payload.Directive
 import org.apache.maven.project.MavenProjectHelper
 import org.apache.maven.project.MavenProject
 import org.apache.maven.artifact.Artifact
@@ -153,6 +154,8 @@ class RedlineMojo extends GroovyMojo {
         builder.setPackage(packaging.name, parsedVersion, packaging.release)
         builder.addHeaderEntry(Header.HeaderTag.SOURCERPM, sourcePackage)
 
+		SRPMSpecTemplate specTemplate = new SRPMSpecTemplate()
+		specTemplate.writeSpecFile("${rpmDestination.absolutePath}/$sourcePackage")
 
         if(postInstallScript != null)
             builder.setPostInstallScript(new File(postInstallScript))
@@ -255,21 +258,25 @@ class RedlineMojo extends GroovyMojo {
         mapping.sources.each {source ->
             def sourceFile = new File(source)
             def absoluteRpmPath
-		    def sourceFileRoot		
+		    def sourceFileRoot
+			
+			Directive irective = new Directive()
+			
+					
             //If a directory was mapped, the entire contents of that tree will be added
             if (sourceFile.isDirectory()) {
                 sourceFileRoot = sourceFile.canonicalPath
                 sourceFile.eachFileRecurse(FileType.FILES, {file ->
                     absoluteRpmPath = directoryInRpm + file.canonicalPath.substring(sourceFileRoot.length()+1)
                     log.info("Adding file ${file.absolutePath} to rpm at path $absoluteRpmPath")
-                    builder.addFile(absoluteRpmPath, file, mapping.filemode, mapping.dirmode, mapping.username, mapping.groupname)
+                    builder.addFile(absoluteRpmPath, file, mapping.filemode, mapping.dirmode, irective, mapping.username, mapping.groupname)
                 })
             }
             //else, only a single file was mapped
             else {
                 absoluteRpmPath = directoryInRpm + sourceFile.name
                 log.info("Adding file $sourceFile to rpm at path $absoluteRpmPath")
-                builder.addFile(absoluteRpmPath, sourceFile, mapping.filemode, mapping.dirmode, mapping.username, mapping.groupname)
+                builder.addFile(absoluteRpmPath, sourceFile, mapping.filemode, mapping.dirmode, directive, mapping.username, mapping.groupname)
             }
         }
     }

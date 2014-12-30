@@ -1,0 +1,9 @@
+Summary: ${summary}
+Name: ${packaging.name}
+Version: 0
+Release: ${packaging.release}
+License: ${redline.licsense}
+Group: ${redline.group}
+%description
+${summary}
+%files
